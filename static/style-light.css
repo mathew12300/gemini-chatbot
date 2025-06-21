@@ -1,0 +1,32 @@
+body {
+  background: #f7f7f7;
+  color: #222;
+}
+.chat-container {
+  background: #ffffff;
+  box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+.chat-header {
+  background: #e6f1ff;
+}
+.chat-header h1 {
+  color: #007acc;
+}
+.chat-box {
+  background: #f2f6fa;
+}
+.message .bubble {
+  background: #e2e8f0;
+  color: #000;
+}
+.message.user .bubble {
+  background: #007acc;
+  color: white;
+}
+.chat-input {
+  background: #f5faff;
+}
+.chat-input input {
+  background: white;
+  color: black;
+}

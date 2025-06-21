@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gemini Chatbot</title>
+  <link id="theme-link" rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">
+      <h1>💬 Gemini Chatbot</h1>
+      <button onclick="toggleTheme()" class="theme-toggle">🌓</button>
+    </div>
+
+    <div id="chat-box" class="chat-box"></div>
+    <div id="typing" class="typing hidden">Gemini is typing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Ask something..." autocomplete="off" />
+      <button onclick="startVoiceInput()">🎙</button>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage("You", message, "user");
+      input.value = "";
+
+      showTyping(true);
+
+      const res = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+
+      const data = await res.json();
+      showTyping(false);
+      appendMessage("Gemini", data.reply, "bot");
+    }
+
+    function appendMessage(sender, message, role) {
+      const chatBox = document.getElementById("chat-box");
+      const msg = document.createElement("div");
+      msg.className = `message ${role}`;
+      msg.innerHTML = `
+        <div class="name">${sender}</div>
+        <div class="bubble">${message.replace(/\n/g, "<br>")}</div>
+      `;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function showTyping(show) {
+      document.getElementById("typing").classList.toggle("hidden", !show);
+    }
+
+    function startVoiceInput() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const speech = event.results[0][0].transcript;
+        document.getElementById("user-input").value = speech;
+        sendMessage();
+      };
+
+      recognition.onerror = function(event) {
+        alert("Voice input error: " + event.error);
+      };
+    }
+
+    function toggleTheme() {
+      const link = document.getElementById("theme-link");
+      const current = link.getAttribute("href");
+
+      if (current.includes("style.css") && !current.includes("style-light.css")) {
+        link.setAttribute("href", "/static/style-light.css");
+        localStorage.setItem("theme", "light");
+      } else {
+        link.setAttribute("href", "/static/style.css");
+        localStorage.setItem("theme", "dark");
+      }
+    }
+
+    window.onload = function () {
+      const saved = localStorage.getItem("theme");
+      const link = document.getElementById("theme-link");
+      if (saved === "light") {
+        link.setAttribute("href", "/static/style-light.css");
+      }
+    };
+  </script>
+</body>
+</html>
